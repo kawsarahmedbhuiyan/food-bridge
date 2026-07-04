@@ -1,98 +1,78 @@
-# FoodBridge CLI
+# FoodBridge
 
-Multi-agent food waste redistribution prototype for CREATE-a-Thon Group 1.
+**Multi-agent food waste redistribution** for CREATE-a-Thon — Toronto Dinesafe + Canada Biomass datasets, with transparent AI decision-making.
 
-Uses **real Toronto Dinesafe** and **Canada Biomass** data from this folder, plus HuggingFace GDELT and supply-chain datasets.
+## Problem
+
+Restaurants discard edible food while communities face food insecurity. FoodBridge coordinates specialized agents to predict surplus, prioritize need, screen donors ethically, match shelters, optimize routes, and negotiate pickup timing.
+
+## Datasets
+
+| Dataset | Path | Used by |
+|---------|------|---------|
+| **Dinesafe** | `data/dinesafe/Dinesafe.csv` | Ethics screening, donor locations, logistics |
+| **Biomass Canada** | `data/biomass/BIOMASS_MSW_INV.csv` | Surplus estimation, need scoring |
+| **GDELT** (optional) | `data/huggingface/gdelt/` or sample CSV | Need prioritization |
+| **Supply chain** (optional) | `data/huggingface/supply_chain/` or sample CSV | Surplus boost signals |
+
+## Agent pipeline (transparent decisions)
+
+Each agent emits auditable **decision steps** (rule → input → outcome → metadata):
+
+| # | Agent | Role |
+|---|-------|------|
+| 1 | **Surplus Estimator** | Monitor inventory; predict kg surplus from Biomass + establishment type |
+| 2 | **Need Prioritizer** | Rank regions by GDELT food-security signals + Biomass organic waste |
+| 3 | **Ethics & Donor Scout** | Pass-only Dinesafe donors; exclude crucial infractions |
+| 4 | **Matcher** | Pair closest high-need recipients; small-org priority queue |
+| 5 | **Logistics Planner** | Nearest-neighbor route optimization; environmental tradeoff disclosure |
+| 6 | **Timing Negotiator** | Auto-negotiate pickup/delivery windows (17:00+ evening run) |
+| 7 | **Ethics Guardian** | Final fairness audit, safety review, human-approval gate |
 
 ## Quick start
 
 ```bash
-cd /Users/kawsar/Desktop/food-bridge
+cd food-bridge
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python scripts/download_datasets.py   # ~1.1 GB GDELT + supply chain CSVs
 
-python main.py
-python main.py --region Scarborough
-python main.py --top 3 --verbose
-python main.py --fast
-```
+# Optional: download HuggingFace datasets (~1.1 GB)
+python scripts/download_datasets.py
 
-## Web app
+# CLI
+python main.py --region Scarborough --top 3 --verbose
 
-```bash
-pip install -r requirements.txt
+# Web app
 uvicorn web.app:app --reload --port 8000
 ```
 
-Open [http://127.0.0.1:8000](http://127.0.0.1:8000) — pick a region, set options, and click **Run planning**. The UI shows the priority zone, agent pipeline, matches, pickup route, ethics report, and an interactive map.
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) — pick a region, set radius/top matches, click **Run planning**. The UI shows map, agent pipeline, clickable audit trail, matches, route, pickup schedule, and ethics report.
 
-## Agents & datasets
+## Ethical safeguards
 
-| Agent | Dataset |
-|-------|---------|
-| Surplus Estimator | `data/biomass/BIOMASS_MSW_INV.csv` + [global-food-supply-chain-models-and-data](https://huggingface.co/datasets/IshaanPotle27/global-food-supply-chain-models-and-data) |
-| Need Prioritizer | [gdelt-food-security-data](https://huggingface.co/datasets/Laurieqq/gdelt-food-security-data) |
-| Donor Scout | `data/dinesafe/Dinesafe.csv` |
-| Matcher | Combined agent outputs |
-| Logistics Planner | `data/dinesafe/Dinesafe.csv` (coordinates) |
-| Ethics Guardian | Dinesafe status + fairness rules |
+- **Safety**: Latest `inspectionStatus = Pass` only; any crucial (`C - Crucial`) infraction disqualifies a donor
+- **Fairness**: Small-organization recipients prioritized in matching queue
+- **Transparency**: Full step-level audit trail per agent in API and dashboard
+- **Environmental**: Logistics agent compares optimized vs estimated random route distance
 
-## CLI options
+## Cursor agent interaction log
 
-| Flag | Description |
-|------|-------------|
-| `--region` | Focus on Scarborough, Regent Park, Downtown Toronto, etc. |
-| `--top N` | Show top N matches (default 5) |
-| `--fast` | Smaller donor pool for quicker demo |
-| `--verbose` | Show dataset source per agent |
+Human ↔ AI chat is recorded in `logs/cursor-agent-interactions.log` via `.cursor/hooks.json`.
 
-## Files
+```bash
+python3 scripts/backfill_cursor_log.py   # backfill from transcripts
+```
+
+## Project structure
 
 ```
 food-bridge/
 ├── main.py              # CLI entry point
-├── web/
-│   ├── app.py           # FastAPI web app
-│   ├── templates/
-│   └── static/
-├── data/
-│   ├── dinesafe/        # Toronto Dinesafe CSV + docs
-│   ├── biomass/         # Canada biomass CSV + docs
-│   ├── huggingface/     # Downloaded HF datasets (gitignored)
-│   ├── processed/       # Cached transforms (gitignored)
-│   ├── sample_gdelt_food_security.csv
-│   └── sample_supply_chain_signals.csv
-├── scripts/
-│   └── download_datasets.py
-└── src/                 # Agents + orchestrator
+├── web/                 # FastAPI + map dashboard
+├── src/agents/          # Specialized transparent agents
+├── src/orchestrator.py  # Pipeline coordinator
+├── data/dinesafe/       # Dinesafe CSV + specs
+├── data/biomass/        # Biomass CSV + specs
+└── scripts/
 ```
-
-## HuggingFace datasets
-
-Download once (~1.1 GB):
-
-```bash
-python scripts/download_datasets.py
-```
-
-| Dataset | HF repo | Local path |
-|---------|---------|------------|
-| GDELT food security | `Laurieqq/gdelt-food-security-data` | `data/huggingface/gdelt/data/` |
-| Supply chain | `IshaanPotle27/global-food-supply-chain-models-and-data` | `data/huggingface/supply_chain/` |
-
-Raw HF files are transformed on first run into `data/processed/` for the agents. Sample CSVs in `data/` are used only as fallback if downloads are missing.
-
-## Note on Biomass
-
-Biomass grid cells have no lat/long in the CSV. The Surplus Estimator uses the **national organic waste distribution** as a baseline, then scores Toronto regions by food-premise density and establishment type from Dinesafe.
-
-## Cursor agent interaction log
-
-Human ↔ AI chat is recorded in **`logs/cursor-agent-interactions.log`**.
-
-- **Automatic logging**: `.cursor/hooks.json` runs hooks on each prompt and agent response
-- **Backfill past chats**: `python3 scripts/backfill_cursor_log.py`
-
-Restart Cursor after adding hooks if they do not appear in the Hooks settings tab.

@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from src.agents.base import BaseAgent
+from src.agents.decisions import DecisionLog
 from src.models import AgentResult
 
 
@@ -9,6 +10,7 @@ class SurplusEstimatorAgent(BaseAgent):
     dataset = "Canada Biomass MSW (#3) + Supply Chain (#5, optional)"
 
     def run(self, context: dict) -> AgentResult:
+        log = DecisionLog()
         biomass_df = context["biomass_df"]
         donors = context["donors"]
         supply_chain = context.get("supply_chain_df")
@@ -17,6 +19,14 @@ class SurplusEstimatorAgent(BaseAgent):
         p50 = float(organic.median())
         p75 = float(organic.quantile(0.75))
         national_pressure = min(1.0, p75 / (p50 * 2) if p50 else 0.5)
+
+        log.add(
+            "Baseline from Biomass MNCPL_SOLID_WASTE_ORGANIC_VOL",
+            f"{len(biomass_df)} grid cells in BIOMASS_MSW_INV.csv",
+            f"National organic pressure index = {national_pressure:.2f} (p50={p50:.0f}, p75={p75:.0f})",
+            p50=round(p50, 1),
+            p75=round(p75, 1),
+        )
 
         region_stats: dict[str, list[str]] = defaultdict(list)
         for donor in donors:
@@ -35,6 +45,13 @@ class SurplusEstimatorAgent(BaseAgent):
         if supply_chain is not None and not supply_chain.empty:
             supply_boost = float(supply_chain["severity"].mean()) * 0.1
 
+        log.add(
+            "Score donors by region density + establishment type",
+            f"{len(donors)} Dinesafe premises across {len(region_scores)} regions",
+            "Grocery/cafeteria types receive higher surplus estimates",
+            supply_chain_boost=round(supply_boost, 2),
+        )
+
         for donor in donors:
             base = region_scores.get(donor.region, 0.4)
             if donor.establishment_type == "Grocery":
@@ -42,9 +59,17 @@ class SurplusEstimatorAgent(BaseAgent):
             elif donor.establishment_type == "Cafeteria":
                 base = min(1.0, base + 0.08 + supply_boost)
             donor.surplus_score = round(min(1.0, base), 2)
+            donor.predicted_surplus_kg = round(base * 35.0, 1)
 
         top_regions = sorted(region_scores, key=region_scores.get, reverse=True)[:3]
         context["region_surplus_scores"] = region_scores
+
+        log.add(
+            "predicted_surplus_kg = surplus_score × 35",
+            f"Top surplus regions: {', '.join(top_regions)}",
+            f"Scored {len(donors)} donors for inventory monitoring",
+            top_regions=top_regions,
+        )
 
         return AgentResult(
             agent_name=self.name,
@@ -59,4 +84,5 @@ class SurplusEstimatorAgent(BaseAgent):
                 "top_surplus_regions": top_regions,
                 "supply_chain_boost": round(supply_boost, 2),
             },
+            decision_steps=log.steps,
         )

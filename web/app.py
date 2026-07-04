@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import Optional
 
 from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse
@@ -43,9 +44,10 @@ async def index(request: Request) -> HTMLResponse:
 
 @app.get("/api/plan")
 async def get_plan(
-    region: str | None = Query(default=None),
+    region: Optional[str] = Query(default=None),
     top: int = Query(default=5, ge=1, le=20),
     fast: bool = Query(default=False),
+    max_distance_km: float = Query(default=15.0, ge=1.0, le=50.0),
 ) -> dict:
     if region and region not in REGIONS:
         region = None
@@ -54,6 +56,7 @@ async def get_plan(
         focus_region=region,
         top_matches=top,
         donor_pool_limit=3000 if fast else None,
+        max_distance_km=max_distance_km,
     )
     return plan_to_dict(plan)
 

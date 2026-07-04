@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from src.agents import (
     DonorScoutAgent,
     EthicsGuardianAgent,
@@ -5,6 +7,7 @@ from src.agents import (
     MatcherAgent,
     NeedPrioritizerAgent,
     SurplusEstimatorAgent,
+    TimingNegotiatorAgent,
 )
 from src.data_loader import (
     load_biomass,
@@ -24,6 +27,7 @@ class FoodBridgeOrchestrator:
             DonorScoutAgent(),
             MatcherAgent(),
             LogisticsPlannerAgent(),
+            TimingNegotiatorAgent(),
             EthicsGuardianAgent(),
         ]
 
@@ -32,6 +36,7 @@ class FoodBridgeOrchestrator:
         focus_region: str | None = None,
         top_matches: int = 5,
         donor_pool_limit: int | None = None,
+        max_distance_km: float = 15.0,
     ) -> RedistributionPlan:
         context = {
             "donors": load_donors(limit=donor_pool_limit),
@@ -42,6 +47,7 @@ class FoodBridgeOrchestrator:
             "focus_region": focus_region,
             "top_matches": top_matches,
             "max_donors": 800,
+            "max_distance_km": max_distance_km,
             "chain_pickup_counts": {"_default_chain": 2},
         }
 

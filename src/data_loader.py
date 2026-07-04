@@ -20,15 +20,16 @@ GDELT_NEED_CACHE = PROCESSED_DIR / "gdelt_need_events.csv"
 SUPPLY_CHAIN_CACHE = PROCESSED_DIR / "supply_chain_signals.csv"
 
 RECIPIENTS = [
-    Recipient("East End Community Kitchen", "Scarborough", 43.7200, -79.2650, 120),
-    Recipient("Regent Park Food Hub", "Regent Park", 43.6580, -79.3580, 80),
+    Recipient("East End Community Kitchen", "Scarborough", 43.7200, -79.2650, 120, is_small_org=True),
+    Recipient("Regent Park Food Hub", "Regent Park", 43.6580, -79.3580, 80, is_small_org=True),
     Recipient("North York Shelter Meals", "North York", 43.7680, -79.4150, 100),
     Recipient("Etobicoke Community Pantry", "Etobicoke", 43.6400, -79.5250, 90),
     Recipient("Downtown Emergency Kitchen", "Downtown Toronto", 43.6520, -79.3840, 150),
-    Recipient("East York Community Meals", "East York", 43.6900, -79.3300, 85),
+    Recipient("East York Community Meals", "East York", 43.6900, -79.3300, 85, is_small_org=True),
 ]
 
-SAFE_STATUSES = {"Pass", "Conditional Pass"}
+CRUCIAL_SEVERITY = "C - Crucial"
+PASS_STATUS = "Pass"
 
 FOOD_EVENT_TYPES = {
     "FOOD_SECURITY": "food_insecurity",
@@ -221,15 +222,25 @@ def load_donors(limit: int | None = None) -> list[Donor]:
     df = pd.read_csv(path, low_memory=False)
     df["inspectionDate"] = pd.to_datetime(df["inspectionDate"], errors="coerce")
     df = df.dropna(subset=["latitude", "longitude"])
+
+    crucial_counts = (
+        df[df["severity"] == CRUCIAL_SEVERITY]
+        .groupby("estId")
+        .size()
+        .to_dict()
+    )
+    minor_mask = df["severity"].fillna("").str.contains("Minor", case=False, na=False)
+    minor_counts = df[minor_mask].groupby("estId").size().to_dict()
+
     latest = df.sort_values("inspectionDate").groupby("estId", as_index=False).tail(1)
-    latest = latest[latest["inspectionStatus"].isin(SAFE_STATUSES)]
 
     donors: list[Donor] = []
     for row in latest.itertuples(index=False):
+        eid = str(row.estId)
         region = lat_lon_to_region(float(row.latitude), float(row.longitude))
         donors.append(
             Donor(
-                establishment_id=str(row.estId),
+                establishment_id=eid,
                 name=str(row.estName).strip(),
                 address=str(row.address),
                 establishment_type=infer_establishment_type(str(row.estName)),
@@ -237,11 +248,14 @@ def load_donors(limit: int | None = None) -> list[Donor]:
                 latitude=float(row.latitude),
                 longitude=float(row.longitude),
                 region=region,
+                crucial_infractions=int(crucial_counts.get(eid, 0)),
+                minor_infractions=int(minor_counts.get(eid, 0)),
+                inspection_date=str(row.inspectionDate.date()) if pd.notna(row.inspectionDate) else "",
             )
         )
 
     if limit:
-        donors.sort(key=lambda d: (d.establishment_type != "Grocery", d.name))
+        donors.sort(key=lambda d: (d.inspection_result != PASS_STATUS, d.name))
         return donors[:limit]
     return donors
 
