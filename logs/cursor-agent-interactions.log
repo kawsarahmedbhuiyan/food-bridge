@@ -326,3 +326,48 @@ Duplicate files from webapp 2 (`app.py`, `static/`, `src/food_bridge/`) were rem
 ================================================================================
 commit all changes and push to github
 
+================================================================================
+[2026-07-04 15:41:02 EDT] ASSISTANT  (source: afterAgentResponse)
+================================================================================
+Committed and pushed to GitHub.
+
+**Commit:** `1c6b4ca` — *Merge both webapp PoCs into a unified multi-agent FoodBridge app.*
+
+**Included:** 34 files changed (+908 / −1680)
+- Unified 7-agent pipeline with transparent decision steps
+- Timing Negotiator, ethics screening, audit trail UI
+- Removed duplicate `app.py`, `static/`, and `src/food_bridge/`
+- Updated README and web dashboard
+
+**Remote:** pushed to `origin/master` at `https://github.com/kawsarahmedbhuiyan/food-bridge.git` (2 commits: `Added webapp 2` + this merge).
+
+================================================================================
+[2026-07-04 15:43:03 EDT] HUMAN  (source: beforeSubmitPrompt)
+================================================================================
+using the presentation template here, create a presentation for the project produced @CREATE-a-Thon Agentic AI Solution.pptx
+
+================================================================================
+[2026-07-04 15:45:01 EDT] ASSISTANT  (source: afterAgentResponse)
+================================================================================
+Created **`FoodBridge_CREATE-a-Thon_Presentation.pptx`** using the CREATE-a-Thon template (layout and branding preserved).
+
+| Slide | Title | Content |
+|-------|--------|---------|
+| 1 | **FoodBridge** | Title + tagline: Agentic AI for Food Waste Redistribution |
+| 2 | **Problem & Stakeholders** | Food insecurity vs. waste, stakeholders, Dinesafe + Biomass datasets |
+| 3 | **Ethical Considerations** | Safety, fairness, transparency, privacy, small-org priority, environmental tradeoffs, human approval |
+| 4 | **Proof-of-Concept** | All 7 agents, architecture, GitHub repo |
+| 5 | **Scalability & Impact** | Multi-city scaling, modular agents, demo instructions |
+
+**Regenerate anytime:**
+```bash
+python scripts/build_presentation.py
+```
+
+Open `FoodBridge_CREATE-a-Thon_Presentation.pptx` in PowerPoint or Google Slides. The original template is unchanged. Want any slide copy adjusted or your team name on the title slide?
+
+================================================================================
+[2026-07-04 15:46:35 EDT] HUMAN  (source: beforeSubmitPrompt)
+================================================================================
+commit changes and push
+
