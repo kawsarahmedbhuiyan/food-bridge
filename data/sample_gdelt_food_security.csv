@@ -1,0 +1,11 @@
+date,region,event_type,severity_score,headline_summary
+2026-03-28,Scarborough,food_insecurity,8.2,Shelter reports increased demand for evening meals
+2026-03-28,Downtown Toronto,food_bank_shortage,6.5,Food bank inventory down 30% this week
+2026-03-27,East York,community_kitchen,7.1,Community kitchen seeks surplus produce donations
+2026-03-27,North York,food_insecurity,5.8,Rising grocery prices strain low-income families
+2026-03-26,Scarborough,food_insecurity,7.9,Newcomer families face meal gaps after benefit delays
+2026-03-26,Etobicoke,food_bank_shortage,6.2,West-end food bank extends hours due to demand
+2026-03-25,Regent Park,community_kitchen,8.5,Youth program needs prepared meal donations
+2026-03-25,Downtown Toronto,surplus_waste,4.1,Report on restaurant food waste in financial district
+2026-03-24,Scarborough,food_insecurity,7.4,School lunch program expansion needed
+2026-03-24,North York,community_kitchen,6.0,Senior centre requests weekly food deliveries

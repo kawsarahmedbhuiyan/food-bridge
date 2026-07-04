@@ -1,0 +1,4 @@
+date,region_hint,disruption_type,severity,description
+2026-03-27,GTA,transport_delay,0.7,Highway closure delays produce deliveries to retailers
+2026-03-26,GTA,overproduction,0.5,Supplier surplus produce after cancelled bulk order
+2026-03-25,Ontario,cold_chain_issue,0.6,Refrigeration fault reported at regional distribution hub
