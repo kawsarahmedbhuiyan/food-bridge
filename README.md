@@ -87,3 +87,12 @@ Raw HF files are transformed on first run into `data/processed/` for the agents.
 ## Note on Biomass
 
 Biomass grid cells have no lat/long in the CSV. The Surplus Estimator uses the **national organic waste distribution** as a baseline, then scores Toronto regions by food-premise density and establishment type from Dinesafe.
+
+## Cursor agent interaction log
+
+Human ↔ AI chat is recorded in **`logs/cursor-agent-interactions.log`**.
+
+- **Automatic logging**: `.cursor/hooks.json` runs hooks on each prompt and agent response
+- **Backfill past chats**: `python3 scripts/backfill_cursor_log.py`
+
+Restart Cursor after adding hooks if they do not appear in the Hooks settings tab.
