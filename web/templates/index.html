@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodBridge — Food Rescue Coordinator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">🌉</span>
+        <div>
+          <h1>FoodBridge</h1>
+          <p class="tagline">Multi-agent food rescue for Toronto</p>
+        </div>
+      </div>
+      <form id="controls" class="controls">
+        <label>
+          Region
+          <select name="region" id="region">
+            <option value="">Auto (from GDELT need data)</option>
+            {% for r in regions %}
+            <option value="{{ r }}">{{ r }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          Top matches
+          <input type="number" name="top" id="top" value="5" min="1" max="20">
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="fast" id="fast">
+          Fast mode
+        </label>
+        <button type="submit" id="run-btn">Run planning</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="main">
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Agents analyzing datasets…</p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="results" class="results hidden">
+      <section class="hero-stats" id="hero-stats"></section>
+
+      <div class="grid">
+        <section class="panel panel-wide">
+          <h2>Route map</h2>
+          <div id="map"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Priority zone</h2>
+          <div id="priority-zone" class="priority-zone"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Agent pipeline</h2>
+          <ol id="agent-pipeline" class="pipeline"></ol>
+        </section>
+
+        <section class="panel panel-wide">
+          <h2>Top matches</h2>
+          <div id="matches" class="matches"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Pickup route</h2>
+          <ol id="route-stops" class="route-stops"></ol>
+        </section>
+
+        <section class="panel">
+          <h2>Ethics &amp; safety</h2>
+          <div id="ethics" class="ethics"></div>
+        </section>
+      </div>
+    </div>
+
+    <div id="empty" class="empty">
+      <p>Configure options above and click <strong>Run planning</strong> to generate a food rescue plan.</p>
+      <p class="hint">Uses Dinesafe, Canada Biomass, GDELT, and supply-chain datasets.</p>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

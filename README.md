@@ -19,6 +19,15 @@ python main.py --top 3 --verbose
 python main.py --fast
 ```
 
+## Web app
+
+```bash
+pip install -r requirements.txt
+uvicorn web.app:app --reload --port 8000
+```
+
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) — pick a region, set options, and click **Run planning**. The UI shows the priority zone, agent pipeline, matches, pickup route, ethics report, and an interactive map.
+
 ## Agents & datasets
 
 | Agent | Dataset |
@@ -44,6 +53,10 @@ python main.py --fast
 ```
 food-bridge/
 ├── main.py              # CLI entry point
+├── web/
+│   ├── app.py           # FastAPI web app
+│   ├── templates/
+│   └── static/
 ├── data/
 │   ├── dinesafe/        # Toronto Dinesafe CSV + docs
 │   ├── biomass/         # Canada biomass CSV + docs
