@@ -438,3 +438,83 @@ Quick start and datasets stay at the end as practical reference only. Say if you
 ================================================================================
 push the changes
 
+================================================================================
+[2026-07-04 15:56:22 EDT] ASSISTANT  (source: afterAgentResponse)
+================================================================================
+Pushed to GitHub.
+
+**Commit:** `634be15` — *Document FoodBridge solution architecture, design, testing, and scaling.*
+
+**Changes:** Updated `README.md` (solution-focused documentation) and the cursor interaction log.
+
+**Remote:** `origin/master` is up to date at https://github.com/kawsarahmedbhuiyan/food-bridge.git
+
+================================================================================
+[2026-07-04 16:02:18 EDT] HUMAN  (source: beforeSubmitPrompt)
+================================================================================
+create a video presentation and text script to go with it for the following presentation  @FoodBridge-CREATE-a-Thon-Deck.pptx
+
+================================================================================
+[2026-07-04 16:04:16 EDT] ASSISTANT  (source: afterAgentResponse)
+================================================================================
+Created presentation materials aligned with **`FoodBridge-CREATE-a-Thon-Deck.pptx`** (7 slides):
+
+## Deliverables
+
+| File | Purpose |
+|------|---------|
+| **`presentation/FoodBridge-Speaker-Script.md`** | Full narration script — timing, slide cues, demo notes, Q&A prep (~7 min) |
+| **`presentation/FoodBridge-Presentation.mp4`** | Narrated video (~2.7 MB, 7 slides with TTS voiceover) |
+| **`presentation/slides/`** | 7 PNG slide cards (1920×1080) |
+| **`presentation/audio/`** | 7 AIFF narration tracks (one per slide) |
+| **`scripts/build_presentation_video.py`** | Regenerates slides, audio, and MP4 |
+
+## Script structure (matches your deck)
+
+1. **Title** — FoodBridge intro  
+2. **Problem** — waste vs. hunger, stakeholders, the “?” gap  
+3. **Ethics** — safety, fairness, transparency, privacy, accountability  
+4. **PoC** — 6 agents, 4 datasets, data flow  
+5. **Demo** — CLI + web dashboard, example match  
+6. **Scalability** — POC → pilot → city-wide  
+7. **Closing** — tagline + thank you  
+
+## How to use
+
+- **Present live:** Open the PPTX, read from `FoodBridge-Speaker-Script.md`  
+- **Submit a video:** Use `presentation/FoodBridge-Presentation.mp4`  
+- **Re-record with your voice:** Play each `audio/slide-NN.aiff` as a timing guide, or re-read the script over the official slides in PowerPoint Record  
+
+Regenerate everything:
+```bash
+python scripts/build_presentation_video.py
+```
+
+If you want the video to use the **exact PowerPoint visuals** instead of generated PNGs, export slides from PowerPoint as images into `presentation/slides/` and run `python scripts/build_presentation_video.py --skip-audio`.
+
+================================================================================
+[2026-07-04 16:05:34 EDT] HUMAN  (source: beforeSubmitPrompt)
+================================================================================
+can you do that for me, i want the exact powerpoint visuals, and can you confirm if the video is audio narrated?
+
+================================================================================
+[2026-07-04 16:08:20 EDT] ASSISTANT  (source: afterAgentResponse)
+================================================================================
+Done — the video now uses the **exact PowerPoint slide visuals** from `FoodBridge-CREATE-a-Thon-Deck.pptx`, and **yes, it is audio-narrated**.
+
+### What I did
+1. **Exported the deck** — slide images from Keynote (`presentation/slides/slide-01.png` … `slide-07.png`) match the PowerPoint deck.
+2. **Fixed the video build** — exported slides are 959×540 (odd width), which broke ffmpeg. The script now scales them to 1920×1080 with letterboxing.
+3. **Rebuilt the MP4** — merged those slide images with the existing TTS narration.
+
+### Output
+**`presentation/FoodBridge-Presentation.mp4`**
+- **Duration:** ~2:38  
+- **Video:** 1920×1080, exact deck visuals per slide  
+- **Audio:** Yes — AAC mono narration (macOS `say` TTS from `FoodBridge-Speaker-Script.md`, one track per slide)
+
+### Audio confirmation
+The file has a dedicated **audio stream** (AAC, mono, ~97 kb/s). Each slide stays on screen for the length of its narration, so it plays as a narrated walkthrough, not a silent slideshow.
+
+If you want a human voice instead of TTS, record over the speaker script in `presentation/FoodBridge-Speaker-Script.md` and I can swap in your audio files.
+
